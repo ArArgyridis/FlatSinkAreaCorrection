@@ -1,9 +1,10 @@
 #include "flatsink.h"
 bool compareIndex ( NeighborhoodIteratorType :: IndexType a, NeighborhoodIteratorType :: IndexType b ) { //not perfect but works to eliminate duplicate indices from vector
-    if ( ( a[0] <= b[0 ] ) && (a[1] <= b[1])  )
+    if   ( ( a[0] <= b[0 ] ) && (a[1] <= b[1])  )
         return true;
-    else if ( ( a[0] > b[0]) && (a[1] < b[1]) )
+    else if  ( ( a[0] >= b[0] ) && (a[1] <= b[1]) )
         return true;
+
 
 
 }
@@ -80,52 +81,6 @@ bool FlatSink :: checkFlatSink( mapIndexType *idMap ) {
 }
 
 
-/*
-bool FlatSink::checkFlatSink() {
-    NeighborhoodIteratorType :: IndexType *idx;
-    idx = new  NeighborhoodIteratorType :: IndexType (neighIt->GetIndex(4) );
-    short *cnt;
-    cnt = new short (0);
-    //counting zero and negatives
-    int *i;
-    i = new int;
-
-    for ( *i = 0;  *i < 9;  (*i)++ )  {
-        if ( *i != 4 ) {
-            if ( neighIt->GetCenterPixel() <= neighIt->GetPixel( *i ) )
-                (*cnt)++;
-        }
-    }
-
-    if (*cnt == 8) {//FS pixel
-        idBuf [  (*idx)[1]*size[0] + (*idx)[0]  ] = id;
-        for ( *i = 0;  *i < 9;  (*i) ++ )  {
-
-            if (*i != 4) {
-                NeighborhoodIteratorType :: IndexType *tmpIdx;
-                tmpIdx =  new NeighborhoodIteratorType :: IndexType (neighIt->GetIndex( *i ) );
-
-                if  ( ( (*tmpIdx)[0] > 0 ) && ((*tmpIdx)[1] > 0 ) && ( (*tmpIdx)[0] < size[0]-1 ) && ((*tmpIdx)[1] < size[1]-1 )  && ( idBuf [(*tmpIdx)[1]*size[0] +(*tmpIdx)[0]  ] == 0 ) ) {
-                    neighIt->SetLocation( (*tmpIdx) );
-                    //recursing until all nearby FS pixels are detected
-                    checkFlatSink();
-                    neighIt->SetLocation( *idx );
-                }
-                delete tmpIdx;
-            }
-        }
-        delete i;
-        delete idx;
-        delete cnt;
-        return true;
-    }
-    else {
-        idBuf [  (*idx)[1]*size[0] + (*idx)[0]  ] = -1;
-        delete idx;
-        return false;
-    }
-}
-*/
 
 FlatSink::~FlatSink() {
 
@@ -230,15 +185,30 @@ void FlatSink::fillSinks() {
                 id++;
                 (*idMap)[id] = k;
             }
+    }
+    idMap->erase(id);
+
+
+    mapIndexType::iterator itMap, itBor;
+    for( itMap = idMap->begin(), itBor=borderMap->begin(); itMap != idMap->end(); itMap++, itBor++) {//for each FAD
+
+
+        //find minimum and maximum border heights
+        PixelType minHeight, maxHeight;
+        neighIt->SetLocation((*itBor).second[0]);
+        minHeight = maxHeight = neighIt->GetCenterPixel();
+        for (register int i = 1; i < (*itBor).second.size(); i++ ) {
+            neighIt->SetLocation((*itBor).second[i]);
+            PixelType tmp = neighIt->GetCenterPixel();
+            if (minHeight > tmp)
+              minHeight = tmp;
+
+            if (maxHeight < tmp)
+              maxHeight = tmp;
+        }
 
 
     }
-    /*
-    WriterType :: Pointer kkk = WriterType :: New();
-    kkk->SetFileName( "checkids.img" );
-    kkk->SetInput(idImage);
-    kkk->Update();
-    */
 
     std :: cout << idMap->size() << "\n";
     delete idMap;
@@ -506,19 +476,19 @@ void FlatSink :: setBorder ( mapIndexType *borderMap, mapIndexType *idMap )  {
 
 
     std :: sort_heap ( borderMap->at(id).begin(), borderMap->at(id).end(), compareIndex );
-    /*
+
     for (register int i = 0; i < borderMap->at(id).size(); i++)
         std::cout << borderMap->at(id)[i] <<"\t";
     std::cout <<"\n";
-    */
+
      borderMap->at(id).erase( std:: unique( borderMap->at(id).begin(), borderMap->at(id).end() ), borderMap->at(id).end() );
 
-    /*
+
 
     for (register int i = 0; i < borderMap->at(id).size(); i++)
         std::cout << borderMap->at(id)[i] <<"\t";
     std::cout <<"\n";
-    */
+
     idIt->SetLocation( tmpIdx );
 }
 
