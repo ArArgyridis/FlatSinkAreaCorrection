@@ -7,6 +7,7 @@
 
 #include <itkImageRegionIterator.h>
 #include <itkConstNeighborhoodIterator.h>
+#include "itkNeighborhoodAlgorithm.h"
 #include <itkNeighborhoodIterator.h>
 #include <otbImage.h>
 #include <otbImageFileReader.h>
@@ -24,35 +25,42 @@ typedef itk :: ImageRegionConstIterator < ImageType > ConstIteratorType;
 typedef itk::NeighborhoodIterator<ImageType> NeighborhoodIteratorType;
 typedef itk :: ImageRegionIterator < ImageType >  IteratorType;
 
+typedef itk::NeighborhoodAlgorithm :: ImageBoundaryFacesCalculator<ImageType> FaceCalculatorType;
+
 typedef  std::map <int, std :: vector<ConstIteratorType :: IndexType> >  mapIndexType;
 
+bool compareIndex(ConstIteratorType :: IndexType, ConstIteratorType :: IndexType);
 
 class FlatSink
 {
-    //buffer to contain FADIDs
-    int id;
-    int  *idBuf, *borderBuf;
+   //temp variables for various functions
+   //mapIndexType *borderMap, *idMap;
 
-    ConstIteratorType :: IndexType idx;
-    NeighborhoodIteratorType :: RadiusType radius;
-    ImageType :: RegionType :: SizeType  size;
-    ImageType::Pointer tmpImage;
-    ReaderType :: Pointer reader;
-    long long numberOfPixels;
-    NeighborhoodIteratorType *neighIt;
 
-    NeighborhoodIteratorType :: IndexType __idx, tmpIdx;
+  //buffer to contain FADIDs
+  int id;
+  int  *idBuf, *borderBuf;
 
-    bool checkFlatSink();
-    void sfd();
-    void setBorder(mapIndexType*, mapIndexType* );
+  ConstIteratorType :: IndexType idx;
+  NeighborhoodIteratorType :: RadiusType radius;
+  ImageType :: RegionType :: SizeType  size;
+  ImageType::Pointer tmpImage, idImage;
+  ReaderType :: Pointer reader;
+  long long numberOfPixels;
+  NeighborhoodIteratorType *neighIt, *idIt;
+  FaceCalculatorType::FaceListType::iterator innerAreaIt;
+
+
+  bool checkFlatSink(mapIndexType*);
+  void sfd();
+  void setBorder(mapIndexType*, mapIndexType* );
 
 public:
-    void fillSinks();
-    ~FlatSink();
-    FlatSink();
-    FlatSink(ReaderType :: Pointer);
-    void writeImage(std::string);
+  void fillSinks();
+  ~FlatSink();
+  FlatSink();
+  FlatSink(ReaderType :: Pointer);
+  void writeImage(std::string);
 };
 
 #endif // FLATSINK_H
