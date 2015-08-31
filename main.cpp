@@ -3,20 +3,15 @@
 #include "flatsink.h"
 
 
-
-bool uniqueIndex ( NeighborhoodIteratorType :: IndexType a, NeighborhoodIteratorType :: IndexType b ) {
-     if ( ( a[0] == b[0 ] ) &&  ( a[1] == b[1] ) )
-    return true;
-}
-
 int main (int argc, char* argv[]) {
-     NeighborhoodIteratorType :: IndexType a,b,c,d,e,f,g,h,k;
 
+    NeighborhoodIteratorType :: IndexType a,b,c,d,e,f,g,h,k;
 
+      /*
       a[0]=39;
-      a[1]=1;
+      a[1]=2;
       b[0] = 37;
-      b[1] =2;
+      b[1] =1;
       c[0] = 39;
       c[1] = 2;
       d[0] = 37;
@@ -57,8 +52,8 @@ int main (int argc, char* argv[]) {
       std::cout <<"\n";
 
 
-      std :: cout << compareIndex(f,e) <<"\t"<< true <<  "\n";
-
+      std :: cout << compareIndex(a,b) <<"\t"<< true <<  "\n";
+    */
 
     const rlim_t kStackSize = 16 * 1024 * 1024;   // min stack size = 160 MB
     struct rlimit rl;
@@ -81,75 +76,11 @@ int main (int argc, char* argv[]) {
 
     FlatSink flt(reader);
     flt.fillSinks();
+    flt.writeImage(argv[2]);
+
+   // std::cout << angl(-2,3) << "\t" << atan2(-2,3) <<"\n";
 
 
-    /*
-  ReaderType :: Pointer reader = ReaderType :: New();
-  reader->SetFileName( argv[1] );
-  reader->Update();
-
-  ImageType::Pointer outputImage = ImageType::New();
-  outputImage->SetRegions( reader->GetOutput()->GetRequestedRegion() );
-  outputImage->CopyInformation(reader->GetOutput());
-  outputImage->Allocate();
-
-  FaceCalculatorType faceCalculator;
-  FaceCalculatorType::FaceListType faceList;
-
-
-  itk::SobelOperator<PixelType, 2> sobelOperator;
-  sobelOperator.SetDirection(::atoi(argv[3]));
-  sobelOperator.CreateDirectional();
-
-
-
-  faceList = faceCalculator(reader->GetOutput(), outputImage->GetRequestedRegion(), sobelOperator.GetRadius());
-
-
-
-  NeighborhoodIteratorType :: RadiusType radius= sobelOperator.GetRadius();
-  itk::NeighborhoodInnerProduct<ImageType> innerProduct;
-
-
-
-  IteratorType out;
-  NeighborhoodIteratorType it;
-
-  FaceCalculatorType::FaceListType::iterator fit;
-  fit = faceList.begin();
-  for (++fit;  fit !=faceList.end(); ++fit) {
-      it = NeighborhoodIteratorType(sobelOperator.GetRadius(), reader->GetOutput(), *fit);
-      out = IteratorType(outputImage, *fit);
-      for (it.GoToBegin(), out.GoToBegin(); !out.IsAtEnd(); ++it, ++out)
-          {
-          out.Set(50.0 );
-          }
-    }
-
-
-
-
-
-
-
-
-
-  fit = faceList.begin();
-  it = NeighborhoodIteratorType(sobelOperator.GetRadius(), reader->GetOutput(), *fit);
-  out = IteratorType(outputImage, *fit);
-  it.GoToBegin();
-  std :: cout << it.GetIndex() << "\t" << it.GetPixel(1) << "\t" << faceList.size() <<  std :: endl;
-
-  for (it.GoToBegin(), out.GoToBegin(); !out.IsAtEnd(); ++it, ++out)
-      {
-      //out.Set(innerProduct(it, sobelOperator));
-      }
-
-  WriterType::Pointer writer = WriterType::New();
-  writer->SetFileName(argv[2]);
-  writer->SetInput(outputImage);
-  writer->Update();
-    */
   std :: cout <<"ALL WELL!!\n";
   return 0;
 

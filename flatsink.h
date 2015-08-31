@@ -30,6 +30,7 @@ typedef itk::NeighborhoodAlgorithm :: ImageBoundaryFacesCalculator<ImageType> Fa
 typedef  std::map <int, std :: vector<ConstIteratorType :: IndexType> >  mapIndexType;
 
 bool compareIndex(ConstIteratorType :: IndexType, ConstIteratorType :: IndexType);
+double angl(double, double);
 
 class FlatSink
 {
@@ -38,8 +39,8 @@ class FlatSink
 
 
   //buffer to contain FADIDs
-  int id;
-  int  *idBuf, *borderBuf;
+  int  id;
+
 
   ConstIteratorType :: IndexType idx;
   NeighborhoodIteratorType :: RadiusType radius;
