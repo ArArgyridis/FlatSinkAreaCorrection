@@ -48,6 +48,7 @@ class FlatSink
   ImageType::Pointer tmpImage, idImage;
   ReaderType :: Pointer reader;
   long long numberOfPixels;
+  double maskValue;
   NeighborhoodIteratorType *neighIt, *idIt;
   FaceCalculatorType::FaceListType::iterator innerAreaIt;
 
@@ -60,7 +61,7 @@ public:
   void fillSinks();
   ~FlatSink();
   FlatSink();
-  FlatSink(ReaderType :: Pointer);
+  FlatSink(ReaderType :: Pointer, double);
   void writeImage(std::string);
 };
 

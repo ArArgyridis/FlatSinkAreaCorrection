@@ -72,15 +72,13 @@ bool FlatSink :: checkFlatSink( mapIndexType *idMap ) {
 
         for ( *i = 0;  *i < 9;  (*i) ++ )  {
             if (*i != 4) {
-                if ( ( idIt->GetPixel( *i ) == 0  ) && (neighIt->GetPixel (*i) != 0 ) ) {
+                if ( ( idIt->GetPixel( *i ) == 0  ) && (neighIt->GetPixel (*i) != maskValue ) ) {
                     neighIt->SetLocation(  neighIt->GetIndex( *i )  );
                     checkFlatSink( idMap );
                     neighIt->SetLocation( *idx );
                     idIt->SetLocation( *idx );
                 }
             }
-            //neighIt->SetLocation(*idx);
-            //idIt->SetLocation(*idx);
         }
 
         delete i;
@@ -120,7 +118,7 @@ FlatSink::FlatSink() {
 
 }
 
-FlatSink::FlatSink(ReaderType :: Pointer pnt): reader(pnt) {
+FlatSink::FlatSink(ReaderType :: Pointer pnt, double val): reader(pnt), maskValue(val) {
 
     reader->Update();
     id = 1;
@@ -152,7 +150,9 @@ FlatSink::FlatSink(ReaderType :: Pointer pnt): reader(pnt) {
     FaceCalculatorType faceCalculator;
     FaceCalculatorType::FaceListType faceList;
 
-    faceList = faceCalculator(idImage, idImage->GetRequestedRegion(), radius);
+    NeighborhoodIteratorType :: RadiusType radiusFace;
+    radiusFace.Fill(2);
+    faceList = faceCalculator(idImage, idImage->GetRequestedRegion(), radiusFace);
 
     //setting the inner area of the id image to 0
     innerAreaIt = faceList.begin();
@@ -170,8 +170,8 @@ FlatSink::FlatSink(ReaderType :: Pointer pnt): reader(pnt) {
     }
 
     innerAreaIt = faceList.begin();
-    rows = idImage->GetLargestPossibleRegion().GetSize()[1];
-    cols = idImage->GetLargestPossibleRegion().GetSize()[0];
+    rows = size[1];
+    cols = size[0];
     neighIt = new  NeighborhoodIteratorType( radius, tmpImage, *innerAreaIt );
     this->idIt = new NeighborhoodIteratorType( radius, idImage, *innerAreaIt );
 }
@@ -194,7 +194,7 @@ void FlatSink::fillSinks() {
             if (idIt->GetIndex() != neighIt->GetIndex() )
                 std :: cout <<idIt->GetIndex() << "\t" <<neighIt->GetIndex() << "\n";
            */
-            if ( (idIt->GetCenterPixel() == 0) && (neighIt->GetCenterPixel() != 0 ) )
+            if ( (idIt->GetCenterPixel() == 0) && (neighIt->GetCenterPixel() != maskValue ) )
                 if ( checkFlatSink( idMap ) ) {// when the if is entered all flat/sink pixels beloning to the same id are determined
                     (*borderMap)[id] = k;
                     setBorder(borderMap, idMap); //getting the border of each FAD
@@ -260,7 +260,7 @@ void FlatSink::fillSinks() {
                         }
                     }
                     if (maxSlope > 0.0 ) {
-                        neighIt->SetCenterPixel( 0.9*neighIt->GetCenterPixel() + 0.1*flowHeight  );
+                        neighIt->SetCenterPixel( 0.9*neighIt->GetCenterPixel() + 0.1*flowHeight );
                     }
                 }
 
@@ -303,12 +303,7 @@ void FlatSink::fillSinks() {
                         //determining if the OF line is inside the FAD
                         bool cont2fs = true;
                         //checking if the line from the outlet towards the pixel is completely inside the FAD
-                        NeighborhoodIteratorType :: IndexType kkk;
-                        kkk[0] = 431;
-                        kkk[1] = 39;
 
-                        if ( *fs == kkk )
-                            std :: cout <<"mounareees\t" << finalHeights <<"\n";
 
                         for ( register int m = 1;  ( (m <= d)  && (cont2fs == true) ); m++ ) {
                             ImageType::IndexType index;
@@ -343,7 +338,6 @@ void FlatSink::fillSinks() {
                                             outletToOutletCounter++;
                                             cont2border = false;
                                         }
-
                                     }
                                 }
                             }
@@ -375,24 +369,33 @@ void FlatSink::fillSinks() {
                         //finding maximum slope - SFD
                         PixelType flowHeight = 9999;
                         float maxSlope = 0.0;
+
                         for (register int pos = 0; pos < 9; pos++) {
                             if ( pos != 4) {
-                                ImageType::IndexType tmpIdx = (*itBor).second[i] + neighIt->GetOffset(pos);
-                                idIt->SetLocation( neighIt->GetIndex( i ) );
-                                //if  (  ( idBuf [ tmpIdx[1]*size[0] +tmpIdx[0]  ] < 1) && ( ( borderBuf [ tmpIdx[1]*size[0] +tmpIdx[0]  ] == 0 ) ) ) {//the examined pixel is neither grouped nor border
-                                if  ( idIt->GetCenterPixel() < 1 ) { //the examined pixel is neither grouped nor border. This suffice since we examine only outlet pixels, thus max slopes will occur only outside the border
-                                    float tmpSlope = ( neighIt->GetCenterPixel() - neighIt->GetPixel(pos) )/std :: sqrt ( std :: pow ( neighIt->GetOffset(pos)[0],2  ) + std :: pow (neighIt->GetOffset(pos)[1] , 2)  ) ;
-                                    if ( maxSlope < tmpSlope   ) {
-                                        maxSlope = tmpSlope;
-                                        flowHeight = neighIt->GetPixel(pos);
+                                idIt->SetLocation( neighIt->GetIndex( pos ) );
+                                if (idIt->InBounds() ) {
+                                    //std :: cout << neighIt->GetIndex(pos) <<"\n";
+                                    if  ( idIt->GetCenterPixel() < 1.0 ) { //the examined pixel is neither grouped nor border. This suffice since we examine only outlet pixels, thus max slopes will occur only outside the border
+
+                                        float tmpSlope = ( neighIt->GetCenterPixel() - neighIt->GetPixel(pos) )/std :: sqrt ( std :: pow ( neighIt->GetOffset(pos)[0],2  ) + std :: pow (neighIt->GetOffset(pos)[1] , 2)  ) ;
+                                        //std :: cout <<(*itBor).first <<"\t" << neighIt->GetCenterPixel() <<"\t" << neighIt->GetPixel(pos) <<"\t" << tmpSlope <<"\n";
+                                        if ( maxSlope < tmpSlope   ) {
+                                            maxSlope = tmpSlope;
+                                            flowHeight = neighIt->GetPixel(pos);
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        //std :: cout << "\n" <<(*itBor).first << "\t"  <<(*itBor).second[i] <<"\t" <<maxSlope <<"\n";
                         if (maxSlope > 0.0 ) {
                             neighIt->SetLocation( (*itBor).second[i] );
-                            neighIt->SetCenterPixel( 0.9*neighIt->GetCenterPixel() + 0.1*flowHeight );
-
+                            neighIt->SetCenterPixel( 0.9*neighIt->GetCenterPixel() + 0.1*flowHeight + ((double) rand() / (RAND_MAX))*0.01 );
+                        }
+                        else {
+                            neighIt->SetLocation( (*itBor).second[i] );
+                            neighIt->SetCenterPixel( flowHeight );
                         }
                     }
                 }
@@ -417,8 +420,8 @@ void FlatSink::fillSinks() {
             }
             */
         }
-
         /*
+
         std :: stringstream ss2;
         ss2 <<"heights_";
         ss2 << reps;
