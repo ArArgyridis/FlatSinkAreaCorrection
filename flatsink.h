@@ -45,11 +45,11 @@ class FlatSink
   ConstIteratorType :: IndexType idx;
   NeighborhoodIteratorType :: RadiusType radius;
   ImageType :: RegionType :: SizeType  size;
-  ImageType::Pointer tmpImage, idImage;
+  ImageType::Pointer borderImage, tmpImage, idImage;
   ReaderType :: Pointer reader;
   long long numberOfPixels;
   double maskValue;
-  NeighborhoodIteratorType *neighIt, *idIt;
+  NeighborhoodIteratorType *neighIt, *idIt, *borderIt;
   FaceCalculatorType::FaceListType::iterator innerAreaIt;
 
 

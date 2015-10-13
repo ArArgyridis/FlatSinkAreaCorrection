@@ -5,7 +5,7 @@
 
 int main (int argc, char* argv[]) {
 
-    const rlim_t kStackSize = 16 * 1024 * 1024;   // min stack size = 160 MB
+    const rlim_t kStackSize = 1600 * 1024 * 1024;   // min stack size = 160 MB
     struct rlimit rl;
     int result;
 
