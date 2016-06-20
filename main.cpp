@@ -5,6 +5,14 @@
 
 int main (int argc, char* argv[]) {
 
+    if (argc < 4)
+      {
+        std::cerr << "Usage: " << std::endl;
+        std::cerr << argv[0] << " inputImageFile outputImageFile maskValue" << std::endl;
+        return EXIT_FAILURE;
+      }
+
+
     const rlim_t kStackSize = 1600 * 1024 * 1024;   // min stack size = 160 MB
     struct rlimit rl;
     int result;
@@ -39,10 +47,10 @@ int main (int argc, char* argv[]) {
 
 int __main(int argc, char* argv[]) {
 
-  if (argc < 3)
+  if (argc < 4)
     {
       std::cerr << "Usage: " << std::endl;
-      std::cerr << argv[0] << " inputImageFile  outputImageFile" << std::endl;
+      std::cerr << argv[0] << " inputImageFile maskValue outputImageFile" << std::endl;
       return EXIT_FAILURE;
     }
 
@@ -62,14 +70,9 @@ int __main(int argc, char* argv[]) {
     }
 
   ReaderType :: Pointer reader = ReaderType :: New();
-  ReaderType :: Pointer readerPlan = ReaderType :: New();
-  //ImportFilterType::Pointer importFilter = ImportFilterType :: New();
 
   reader->SetFileName(argv[1]);
-  readerPlan->SetFileName(argv[2]);
-
-
-  FlatSink flt(reader , atof(argv[3]) );
+  FlatSink flt(reader , atof(argv[2]) );
 
   flt.fillSinks();
   flt.writeImage( std :: string( argv[3] ) );
