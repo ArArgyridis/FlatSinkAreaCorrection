@@ -165,17 +165,8 @@ FlatSink::FlatSink(ReaderType :: Pointer pnt, double val): reader(pnt), maskValu
 
     this->borderIt = new NeighborhoodIteratorType( radius, borderImage, idImage->GetRequestedRegion() );
 
-    /*
-    for (idIt.GoToBegin(); !idIt.IsAtEnd(); ++idIt ) {
-        idIt.Set( 0 );
-    }
-    */
     idImage->FillBuffer(0);
 
-    /*
-    for(borderIt->GoToBegin(); !borderIt->IsAtEnd(); borderIt->operator ++() )
-        borderIt->SetCenterPixel(0);
-    */
     borderImage->FillBuffer(0);
     //setting the frame of the id image to -1 thus to be ignored by the algorithm
     innerAreaIt++;
@@ -225,10 +216,10 @@ void FlatSink::fillSinks() {
 
         }
         idMap->erase(id);
-
         /*
-        if (idMap->size() < 10) {
-        std :: stringstream ss;
+
+        if (idMap->size() == 2) {
+        std :: stringstream ss, ss2;
         ss << reps;
         ss  <<".img";
         std :: cout << ss.str() <<"\n";
@@ -236,21 +227,19 @@ void FlatSink::fillSinks() {
         writer->SetFileName( ss.str() );
         writer->SetInput(idImage );
         writer->Update();
+
+
+        ss2 << reps;
+        ss2 << "_dem.img";
+        writer->SetFileName( ss2.str() );
+        writer->SetInput(tmpImage);
+        writer->Update();
+
        }
-*/
+        */
 
 
         std :: cout <<"Number of detected flat-sink areas: " << idMap->size() <<"\n";
-
-        if ( (idMap->size() == 7283) ) {
-            std :: stringstream ss2;
-            ss2 <<"id_check";
-            ss2  <<".img";
-            WriterType :: Pointer   writer2 = WriterType :: New();
-            writer2->SetFileName( ss2.str() );
-            writer2->SetInput(idImage );
-            writer2->Update();
-        }
 
         mapIndexType::iterator itMap, itBor;
         /*
@@ -258,11 +247,12 @@ void FlatSink::fillSinks() {
           std :: cout <<(*itMap).second.size() << "\t"<< (*itBor).second.size() << "\n";
         }
      */
+
         for( itMap = idMap->begin(), itBor=borderMap->begin(); itMap != idMap->end(); itMap++, itBor++) {//for each FAD
 
             //minimum and maximum border heights
             PixelType minHeight = 99999999, maxHeight = -99999999;
-             int curID = (*itMap).first;
+            int curID = (*itMap).first;
             for (register int i = 0; i < (*itMap).second.size(); i++ ) {
                 neighIt->SetLocation( (*itMap).second[i] );
                 idIt->SetLocation( (*itMap).second[i] );
@@ -281,9 +271,10 @@ void FlatSink::fillSinks() {
                     }
                 }
             }
-
             /*
-            if ( (*itBor).second.size()>8 ) {
+            std :: cout <<minHeight <<"\t"<<maxHeight <<"\n";
+
+            if ( true ) {
                 std :: cout <<"id = " <<curID <<"\n";
                 std :: stringstream ss2;
                 ss2 <<curID <<"_BORDER";
@@ -295,6 +286,7 @@ void FlatSink::fillSinks() {
 
             }
             */
+
 
             for (register int i = 0; i < (*itMap).second.size(); i++) {
                 neighIt->SetLocation((*itMap).second[i]);
